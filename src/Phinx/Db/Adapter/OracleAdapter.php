@@ -62,7 +62,13 @@ class OracleAdapter extends PdoAdapter implements AdapterInterface
             // default oracle port
             $port = isset($options['port']) ? $options['port'] : 1521;
 
-            $db = @oci_new_connect($options['user'], $options['pass'], $options['host'].':'.$port.'/'.$options['sid'], $options['charset']);
+            if(isset($options['use_tns']) && $options['use_tns']) {
+                $connectionString = "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = {$options['host']} )(PORT = {$port} )) ) (CONNECT_DATA = (SID = {$options['sid']} ) ) )";
+            } else {
+                $connectionString = $options['host'].':'.$port.'/'.$options['sid'];
+            }
+
+            $db = @oci_new_connect($options['user'], $options['pass'], $connectionString, $options['charset']);
 
             if (!$db) {
                 $err = oci_error();
